@@ -82,7 +82,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Harness the power of Robons AI's Deep ML Tasks API to transform your data into intelligent insights and automate complex processes.
+          Harness the power of Robons AI&apos;s Deep ML Tasks API to transform your data into intelligent insights and automate complex processes.
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: -20 }}

@@ -5,6 +5,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Sphere, MeshDistortMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { Button } from "@/components/ui/button"
+import { motion } from 'framer-motion'
 
 function NeuralNetwork() {
   const groupRef = useRef<THREE.Group>(null)
@@ -88,9 +89,14 @@ export default function HeroSection3D() {
         <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gradient">
           Power Your Applications with Enterprise ML
         </h1>
-        <p className="text-xl mb-8 text-purple-200">
-          Harness the power of Robons AI's Deep ML Tasks API
-        </p>
+        <motion.p
+          className="text-xl mb-8 text-purple-200 max-w-2xl"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          Harness the power of Robons AI&apos;s Deep ML Tasks API to transform your data into intelligent insights and automate complex processes.
+        </motion.p>
         <Button size="lg" className="bg-purple-800 hover:bg-purple-900 text-white">
           Explore API Docs
         </Button>

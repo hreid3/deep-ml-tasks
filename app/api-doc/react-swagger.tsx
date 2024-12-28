@@ -5,8 +5,22 @@ import SwaggerUIBundle from 'swagger-ui-dist/swagger-ui-bundle';
 import 'swagger-ui-dist/swagger-ui.css';
 import './swagger-theme.css';
 
+// OpenAPI specification type
+export type OpenAPISpec = {
+  openapi?: string;
+  info?: {
+    title: string;
+    version: string;
+    [key: string]: unknown;
+  };
+  paths?: Record<string, unknown>;
+  components?: Record<string, unknown>;
+  tags?: Array<unknown>;
+  [key: string]: unknown;
+};
+
 type Props = {
-  spec: Record<string, any>;
+  spec: OpenAPISpec;
 };
 
 function ReactSwagger({ spec }: Props) {
