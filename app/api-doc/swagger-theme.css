@@ -1,0 +1,101 @@
+/* Override Swagger UI theme */
+:root {
+  --theme-color: #1f2937;
+}
+
+.swagger-ui {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: white;
+}
+
+/* Override the green color */
+.swagger-ui .opblock.opblock-get {
+  background: rgba(31, 41, 55, 0.1);
+  border-color: #1f2937;
+}
+
+.swagger-ui .opblock.opblock-post {
+  background: rgba(31, 41, 55, 0.1);
+  border-color: #1f2937;
+}
+
+.swagger-ui .opblock.opblock-delete {
+  background: rgba(31, 41, 55, 0.1);
+  border-color: #1f2937;
+}
+
+.swagger-ui .opblock.opblock-put {
+  background: rgba(31, 41, 55, 0.1);
+  border-color: #1f2937;
+}
+
+.swagger-ui .opblock.opblock-patch {
+  background: rgba(31, 41, 55, 0.1);
+  border-color: #1f2937;
+}
+
+.swagger-ui .opblock .opblock-summary-method {
+  background: #1f2937 !important;
+}
+
+.swagger-ui .opblock-tag {
+  color: #1f2937;
+  font-weight: 600;
+  border: none;
+}
+
+.swagger-ui .opblock .opblock-summary {
+  border: none;
+}
+
+.swagger-ui .opblock .opblock-section-header {
+  background: #f3f4f6;
+  border: none;
+}
+
+.swagger-ui .btn {
+  box-shadow: none;
+}
+
+.swagger-ui .btn.execute {
+  background-color: #1f2937 !important;
+}
+
+.swagger-ui .btn.execute:hover {
+  background-color: #374151 !important;
+}
+
+/* Override scheme selection */
+.swagger-ui select {
+  border: 1px solid #e5e7eb !important;
+  box-shadow: none !important;
+  background: white !important;
+}
+
+.swagger-ui .scheme-container {
+  background: white !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Override info section */
+.swagger-ui .info .title {
+  color: #1f2937;
+}
+
+.swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
+  color: #4b5563;
+}
+
+/* Code highlighting */
+.swagger-ui .highlight-code {
+  background-color: #1f2937 !important;
+}
+
+.swagger-ui .microlight {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  padding: 1rem;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+} 
