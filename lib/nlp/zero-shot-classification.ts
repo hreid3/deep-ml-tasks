@@ -1,7 +1,13 @@
 import { pipeline, Pipeline } from "@huggingface/transformers";
 
+interface ZeroShotClassificationStatic {
+  getInstance(): Promise<Pipeline>;
+  classify(text: string, categories: string[], topN?: number): Promise<ClassificationResult[]>;
+}
+
 declare global {
-  var ZeroShotClassificationPipelineSingleton: any;
+  // eslint-disable-next-line no-var
+  var ZeroShotClassificationPipelineSingleton: ZeroShotClassificationStatic;
 }
 
 interface ClassificationResult {

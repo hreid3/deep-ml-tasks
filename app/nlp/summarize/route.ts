@@ -60,7 +60,6 @@ export async function POST(request) {
 	const summarizer = await SummarizationPipelineSingleton.getInstance();
 	// Perform the summarization
 	const result = await summarizer(text);
-	console.log("Horace.result", result);
 
 	return NextResponse.json(result);
 }
