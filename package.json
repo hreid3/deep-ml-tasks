@@ -15,10 +15,6 @@
     "type": "git",
     "url": "https://github.com/ai-biz/deep-ml-tasks"
   },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
-  },
   "scripts": {
     "dev": "next dev -p 8080 --experimental-https",
     "build": "next build",
@@ -42,7 +38,8 @@
     "sharp": "^0.33.5",
     "swagger-ui-dist": "^5.18.2",
     "tailwind-merge": "^2.6.0",
-    "three": "0.159.0"
+    "three": "0.159.0",
+    "lucide-react": "^0.344.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -56,5 +53,10 @@
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
+

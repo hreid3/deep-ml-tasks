@@ -1,101 +1,105 @@
-// @ts-nocheck
 'use client'
 
-import { useEffect, useRef } from 'react'
-import * as THREE from 'three'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Sphere, MeshDistortMaterial } from '@react-three/drei'
+import React, { useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
 import { Button } from "@/components/ui/button"
+import { ArrowRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
-function NeuralNetwork() {
-  const groupRef = useRef<THREE.Group>(null)
-
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.x += 0.001
-      groupRef.current.rotation.y += 0.002
-    }
-  })
-
-  useEffect(() => {
-    const group = new THREE.Group()
-    const geometry = new THREE.SphereGeometry(0.138, 32, 32)
-    const material = new THREE.MeshStandardMaterial({
-      color: 0xa855f7,
-      metalness: 0.9,
-      roughness: 0.1,
-      envMapIntensity: 1,
-    })
-
-    for (let i = 0; i < 20; i++) {
-      const mesh = new THREE.Mesh(geometry, material)
-      mesh.position.set(
-        (Math.random() * 4.8 - 2.4),
-        (Math.random() * 4.8 - 2.4),
-        (Math.random() * 4.8 - 2.4)
-      )
-      group.add(mesh)
-    }
-
-    for (let i = 0; i < 40; i++) {
-      const startNode = group.children[Math.floor(Math.random() * group.children.length)]
-      const endNode = group.children[Math.floor(Math.random() * group.children.length)]
-      
-      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x7c3aed, transparent: true, opacity: 0.4 })
-      const lineGeometry = new THREE.BufferGeometry().setFromPoints([startNode.position, endNode.position])
-      const line = new THREE.Line(lineGeometry, lineMaterial)
-      group.add(line)
-    }
-
-    if (groupRef.current) {
-      groupRef.current.add(group)
-    }
-  }, [])
-
-  return <group ref={groupRef} />
+// Seeded random number generator
+function seededRandom(seed: number) {
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
 }
 
-function ShimmeringBackground() {
+const Particle = ({ index }: { index: number }) => {
+  const seed = index * 1000;
+  const size = seededRandom(seed) * 4 + 1;
+  const initialX = seededRandom(seed + 1) * 100;
+  const initialY = seededRandom(seed + 2) * 100;
+
   return (
-    <Sphere args={[30, 100, 100]}>
-      <MeshDistortMaterial
-        color="#05000a"
-        attach="material"
-        distort={0.4}
-        speed={4}
-        roughness={1}
-      />
-    </Sphere>
+    <motion.div
+      className="absolute rounded-full bg-purple-500 opacity-50"
+      style={{
+        width: size,
+        height: size,
+        left: `${initialX}%`,
+        top: `${initialY}%`,
+      }}
+      animate={{
+        x: [0, seededRandom(seed + 3) * 100 - 50, 0],
+        y: [0, seededRandom(seed + 4) * 100 - 50, 0],
+      }}
+      transition={{
+        duration: seededRandom(seed + 5) * 10 + 10,
+        repeat: Infinity,
+        ease: "linear"
+      }}
+    />
   )
 }
 
-function FixedLight() {
-  return <directionalLight position={[0, 5, 0]} intensity={2} color="#ffffff" />
-}
-
 export default function HeroSection() {
+  const particlesRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (particlesRef.current) {
+        const { left, top, width, height } = particlesRef.current.getBoundingClientRect()
+        const x = (e.clientX - left) / width
+        const y = (e.clientY - top) / height
+
+        particlesRef.current.style.setProperty('--mouse-x', x.toString())
+        particlesRef.current.style.setProperty('--mouse-y', y.toString())
+      }
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+
   return (
-    <section className="w-full h-screen flex flex-col items-center justify-center relative overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <Canvas camera={{ position: [0, 0, 5] }}>
-          <ambientLight intensity={0.2} />
-          <FixedLight />
-          <ShimmeringBackground />
-          <NeuralNetwork />
-          <OrbitControls enableZoom={false} enablePan={false} />
-        </Canvas>
+    <section className="relative w-full h-screen overflow-hidden bg-gradient-to-b from-purple-950 to-black">
+      <div ref={particlesRef} className="absolute inset-0">
+        {Array.from({ length: 50 }).map((_, index) => (
+          <Particle key={index} index={index} />
+        ))}
       </div>
-      <div className="z-10 text-center">
-        <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gradient">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
+        <motion.h1 
+          className="text-4xl md:text-6xl font-bold mb-6 text-gradient"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
           Power Your Applications with Enterprise ML
-        </h1>
-        <p className="text-xl mb-8 text-purple-200">
-          Harness the power of Robons AI's Deep ML Tasks API
-        </p>
-        <Button size="lg" className="bg-purple-800 hover:bg-purple-900 text-white">
-          Explore API Docs
-        </Button>
+        </motion.h1>
+        <motion.p 
+          className="text-xl mb-8 text-purple-200 max-w-2xl"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          Harness the power of Robons AI's Deep ML Tasks API to transform your data into intelligent insights and automate complex processes.
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+        >
+          <Button 
+            size="lg" 
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+            onClick={() => router.push('/api-doc')}
+          >
+            Explore API Docs
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </motion.div>
       </div>
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent"></div>
     </section>
   )
 }
