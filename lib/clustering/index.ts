@@ -1,4 +1,4 @@
-import { clusterEmbeddings } from './kmeans';
+import { clusterEmbeddings } from './kmeanspp';
 import { detectOutliers } from './outliers';
 import type { ClusterInput, ClusterOutput } from './types';
 

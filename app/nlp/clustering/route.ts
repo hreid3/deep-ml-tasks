@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { clusterEmbeddings } from '@/lib/clustering/kmeans';
+import { clusterEmbeddings } from '@/lib/clustering/kmeanspp';
 
 /**
  * @swagger
