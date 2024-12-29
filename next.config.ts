@@ -12,14 +12,16 @@ const nextConfig: NextConfig = {
     serverExternalPackages: [
         '@huggingface/transformers',
         'onnxruntime-node',
-        'swagger-ui-react'
+        'swagger-ui-react',
+        '@tensorflow/tfjs-node'
     ],
     webpack: (config: Configuration) => {
         if (!config.resolve) config.resolve = { alias: {} };
         config.resolve.alias = {
             ...config.resolve.alias,
             '@huggingface/transformers': path.resolve(__dirname, 'node_modules/@huggingface/transformers'),
-            'swagger-ui-react': path.resolve(__dirname, 'node_modules/swagger-ui-react')
+            'swagger-ui-react': path.resolve(__dirname, 'node_modules/swagger-ui-react'),
+            '@tensorflow/tfjs-node': path.resolve(__dirname, 'node_modules/@tensorflow/tfjs-node')
         }
         return config;
     },
