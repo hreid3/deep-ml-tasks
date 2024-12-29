@@ -1,18 +1,8 @@
 import * as tf from '@tensorflow/tfjs';
-
-interface ClusterInput {
-  text: string;
-  embedding: number[];
-  isOutlier?: boolean;
-}
-
-interface ClusterOutput {
-  [key: string]: ClusterInput[];
-}
+import { ClusterInput, ClusterOutput } from './types';
 
 interface ClusteringOptions {
   nClusters?: number;
-  outlierThreshold?: number; // Distance threshold for outliers
   minClusterSize?: number;   // Minimum points per cluster
 }
 
@@ -146,7 +136,7 @@ export async function clusterEmbeddings(
   options: ClusteringOptions | number = {}
 ): Promise<ClusterOutput> {
   const opts = typeof options === 'number' ? { nClusters: options } : options;
-  const { nClusters = 3, outlierThreshold = 0.7 } = opts;
+  const { nClusters = 3 } = opts;
 
   if (!inputs.length) throw new Error('Input array cannot be empty');
 
@@ -179,7 +169,7 @@ export async function clusterEmbeddings(
   }
 
   // 4) Run k-means in a tf.tidy block
-  const [labels, centroids, maxSimArray] = tf.tidy(() => {
+  const [labels, centroids] = tf.tidy(() => {
     const embeddings = tf.tensor2d(inputs.map(input => input.embedding));
     const initialCentroids = kmeansppInit(embeddings, effectiveNClusters);
 
@@ -207,7 +197,7 @@ export async function clusterEmbeddings(
     const maxSimilarities = tf.max(scaledSimilarities, 1);
     const simArr = maxSimilarities.arraySync() as number[];
 
-    return [assignments, fittedCentroids, simArr];
+    return [assignments, fittedCentroids];
   });
 
   // 5) Build final result
@@ -221,14 +211,12 @@ export async function clusterEmbeddings(
   // Assign points to clusters and tag outliers
   const labelArray = labels.arraySync() as number[];
   labelArray.forEach((label, i) => {
-    const maxSim = maxSimArray[i];
     const clusterKey = `cluster_${label % effectiveNClusters}`;
     
     // Create a copy of the input with outlier flag
     const point = {
       text: inputs[i].text,
       embedding: inputs[i].embedding,
-      isOutlier: maxSim < outlierThreshold
     };
 
     // Always assign to a cluster
