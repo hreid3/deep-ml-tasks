@@ -9,6 +9,12 @@ interface ClusterOutput {
   [key: string]: ClusterInput[];
 }
 
+interface ClusteringOptions {
+  nClusters?: number;
+  outlierThreshold?: number; // Distance threshold for outliers
+  minClusterSize?: number;   // Minimum points per cluster
+}
+
 /**
  * Custom k-means++ initialization
  */
@@ -129,36 +135,64 @@ function kmeansClustering(data: tf.Tensor2D, centroids: tf.Tensor2D, maxIter: nu
  */
 export async function clusterEmbeddings(
   inputs: ClusterInput[],
-  nClusters: number = 3
+  options: ClusteringOptions | number = {}
 ): Promise<ClusterOutput> {
+  // Handle backward compatibility where options was just nClusters number
+  const opts = typeof options === 'number' ? { nClusters: options } : options;
+  
+  const {
+    nClusters = 3,
+    // outlierThreshold = 0.7,  // Commented out
+    // minClusterSize = 2       // Commented out
+  } = opts;
+
   if (!inputs.length) throw new Error('Input array cannot be empty');
 
+  // Validate embedding dimensions
   const embeddingLength = inputs[0].embedding.length;
   if (!inputs.every(input => input.embedding.length === embeddingLength)) {
     throw new Error('All embeddings must have the same length');
   }
 
-  nClusters = Math.min(Math.max(2, nClusters), Math.min(6, inputs.length));
+  // Enforce cluster count limits
+  const effectiveNClusters = Math.min(
+    Math.max(2, nClusters), 
+    Math.min(6, inputs.length)
+  );
 
-  // Do tensor operations in tidy
-  const labels = tf.tidy(() => {
+  // Check if all embeddings are identical first
+  const firstEmbedding = inputs[0].embedding;
+  const allIdentical = inputs.every(input => 
+    input.embedding.every((val, i) => Math.abs(val - firstEmbedding[i]) < 1e-6)
+  );
+
+  if (allIdentical) {
+    return { 'cluster_0': inputs };
+  }
+
+  // Wrap tensor operations in tidy
+  const [labels, centroids] = tf.tidy(() => {
     const embeddings = tf.tensor2d(inputs.map(input => input.embedding));
-    const normalizedEmbeddings = tf.div(embeddings, tf.norm(embeddings, 2, 1, true)) as tf.Tensor2D;
-    const initialCentroids = kmeansppInit(normalizedEmbeddings, nClusters);
-    const [labels] = kmeansClustering(normalizedEmbeddings, initialCentroids);
-    return labels;
+    const initialCentroids = kmeansppInit(embeddings, effectiveNClusters);
+    return kmeansClustering(embeddings, initialCentroids);
   });
 
-  // Create result outside tidy
+  // Process results outside tidy
   const result: ClusterOutput = {};
   const labelArray = labels.arraySync() as number[];
-  
+
+  // Initialize and fill clusters
+  for (let i = 0; i < effectiveNClusters; i++) {
+    result[`cluster_${i}`] = [];
+  }
+
   labelArray.forEach((label, index) => {
-    const clusterKey = `cluster_${label}`;
-    if (!result[clusterKey]) result[clusterKey] = [];
+    const clusterKey = `cluster_${label % effectiveNClusters}`;
     result[clusterKey].push(inputs[index]);
   });
 
+  // Dispose both tensors
   labels.dispose();
+  centroids.dispose();
   return result;
 } 
