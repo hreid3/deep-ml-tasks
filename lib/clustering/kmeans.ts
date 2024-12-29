@@ -3,6 +3,7 @@ import * as tf from '@tensorflow/tfjs';
 interface ClusterInput {
   text: string;
   embedding: number[];
+  isOutlier?: boolean;
 }
 
 interface ClusterOutput {
@@ -40,8 +41,15 @@ function kmeansppInit(data: tf.Tensor2D, k: number): tf.Tensor2D {
 
       // Convert to probabilities and select next centroid
       const distArray = distances.arraySync() as number[];
-      const sum = distArray.reduce((a, b) => a + b, 0);
-      const probs = distArray.map(d => d / sum);
+      let sum = 0;
+      const probs = distArray.map(d => {
+        sum += d;
+        return d;
+      });
+      // Now normalize in place
+      for (let i = 0; i < probs.length; i++) {
+        probs[i] /= sum;
+      }
       
       let r = Math.random();
       let idx = 0;
@@ -137,62 +145,99 @@ export async function clusterEmbeddings(
   inputs: ClusterInput[],
   options: ClusteringOptions | number = {}
 ): Promise<ClusterOutput> {
-  // Handle backward compatibility where options was just nClusters number
   const opts = typeof options === 'number' ? { nClusters: options } : options;
-  
-  const {
-    nClusters = 3,
-    // outlierThreshold = 0.7,  // Commented out
-    // minClusterSize = 2       // Commented out
-  } = opts;
+  const { nClusters = 3, outlierThreshold = 0.7 } = opts;
 
   if (!inputs.length) throw new Error('Input array cannot be empty');
 
-  // Validate embedding dimensions
+  // 1) Validate embedding dimensions
   const embeddingLength = inputs[0].embedding.length;
   if (!inputs.every(input => input.embedding.length === embeddingLength)) {
     throw new Error('All embeddings must have the same length');
   }
 
-  // Enforce cluster count limits
+  // 2) Enforce cluster count limits
   const effectiveNClusters = Math.min(
     Math.max(2, nClusters), 
     Math.min(6, inputs.length)
   );
 
-  // Check if all embeddings are identical first
+  // Check for identical embeddings (special case)
   const firstEmbedding = inputs[0].embedding;
   const allIdentical = inputs.every(input => 
+    input.embedding.length === firstEmbedding.length &&
     input.embedding.every((val, i) => Math.abs(val - firstEmbedding[i]) < 1e-6)
   );
-
+  
   if (allIdentical) {
-    return { 'cluster_0': inputs };
+    // Return a single cluster if everything is identical
+    return { 'cluster_0': inputs.map(input => ({
+      text: input.text,
+      embedding: input.embedding,
+      isOutlier: false
+    }))};
   }
 
-  // Wrap tensor operations in tidy
-  const [labels, centroids] = tf.tidy(() => {
+  // 4) Run k-means in a tf.tidy block
+  const [labels, centroids, maxSimArray] = tf.tidy(() => {
     const embeddings = tf.tensor2d(inputs.map(input => input.embedding));
     const initialCentroids = kmeansppInit(embeddings, effectiveNClusters);
-    return kmeansClustering(embeddings, initialCentroids);
+
+    // First run k-means to get cluster assignments
+    const [assignments, fittedCentroids] = kmeansClustering(
+      embeddings, 
+      initialCentroids
+    );
+
+    // Normalize embeddings and centroids for cosine similarity
+    const normalizedEmbeddings = tf.div(
+      embeddings,
+      tf.norm(embeddings, 2, 1, true)
+    );
+    const normalizedCentroids = tf.div(
+      fittedCentroids,
+      tf.norm(fittedCentroids, 2, 1, true)
+    );
+    
+    // Compute cosine similarities directly
+    const similarities = tf.matMul(normalizedEmbeddings, normalizedCentroids.transpose());
+    
+    // Convert similarities from [-1,1] to [0,1] range
+    const scaledSimilarities = tf.div(tf.add(similarities, 1), 2);
+    const maxSimilarities = tf.max(scaledSimilarities, 1);
+    const simArr = maxSimilarities.arraySync() as number[];
+
+    return [assignments, fittedCentroids, simArr];
   });
 
-  // Process results outside tidy
+  // 5) Build final result
   const result: ClusterOutput = {};
-  const labelArray = labels.arraySync() as number[];
 
-  // Initialize and fill clusters
+  // Initialize all clusters
   for (let i = 0; i < effectiveNClusters; i++) {
     result[`cluster_${i}`] = [];
   }
 
-  labelArray.forEach((label, index) => {
+  // Assign points to clusters and tag outliers
+  const labelArray = labels.arraySync() as number[];
+  labelArray.forEach((label, i) => {
+    const maxSim = maxSimArray[i];
     const clusterKey = `cluster_${label % effectiveNClusters}`;
-    result[clusterKey].push(inputs[index]);
+    
+    // Create a copy of the input with outlier flag
+    const point = {
+      text: inputs[i].text,
+      embedding: inputs[i].embedding,
+      isOutlier: maxSim < outlierThreshold
+    };
+
+    // Always assign to a cluster
+    result[clusterKey].push(point);
   });
 
-  // Dispose both tensors
+  // Clean up
   labels.dispose();
   centroids.dispose();
+
   return result;
 } 
