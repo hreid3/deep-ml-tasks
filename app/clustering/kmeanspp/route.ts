@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { clusterEmbeddings } from '../../../lib/clustering/kmeanspp';
+import type { ClusterInput } from '../../../lib/clustering/types';
+
+interface RequestBody {
+  inputs: ClusterInput[];
+  nClusters?: number;
+}
 
 /**
  * @swagger
@@ -96,7 +102,7 @@ import { clusterEmbeddings } from '../../../lib/clustering/kmeanspp';
  */
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await req.json() as RequestBody;
     
     if (!Array.isArray(body.inputs)) {
       return NextResponse.json(
@@ -107,12 +113,12 @@ export async function POST(req: NextRequest) {
 
     // Validate input format
     const isValidInput = body.inputs.every(
-      (item: any) =>
+      (item: ClusterInput) =>
         typeof item === 'object' &&
         item !== null &&
         typeof item.text === 'string' &&
         Array.isArray(item.embedding) &&
-        item.embedding.every((num: any) => typeof num === 'number')
+        item.embedding.every((num: number) => typeof num === 'number')
     );
 
     if (!isValidInput) {
@@ -126,10 +132,10 @@ export async function POST(req: NextRequest) {
     const clusters = await clusterEmbeddings(body.inputs, nClusters);
 
     return NextResponse.json(clusters);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Clustering error:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     );
   }

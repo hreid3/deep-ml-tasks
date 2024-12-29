@@ -39,14 +39,6 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 /**
- * Normalize a vector to unit length
- */
-function normalizeVector(vec: number[]): number[] {
-  const magnitude = Math.sqrt(vec.reduce((sum, val) => sum + val * val, 0));
-  return vec.map(val => val / magnitude);
-}
-
-/**
  * Post-processes clustering results to identify outliers
  */
 export function detectOutliers(

@@ -1,5 +1,3 @@
-import { ClusterOutput } from '../types';
-
 /**
  * Options for outlier detection
  */
