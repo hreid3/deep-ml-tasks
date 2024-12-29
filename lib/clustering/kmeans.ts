@@ -140,11 +140,13 @@ export async function clusterEmbeddings(
 
   nClusters = Math.min(Math.max(2, nClusters), Math.min(6, inputs.length));
 
-  const [labels] = tf.tidy(() => {
+  // Do tensor operations in tidy
+  const labels = tf.tidy(() => {
     const embeddings = tf.tensor2d(inputs.map(input => input.embedding));
     const normalizedEmbeddings = tf.div(embeddings, tf.norm(embeddings, 2, 1, true)) as tf.Tensor2D;
     const initialCentroids = kmeansppInit(normalizedEmbeddings, nClusters);
-    return kmeansClustering(normalizedEmbeddings, initialCentroids);
+    const [labels] = kmeansClustering(normalizedEmbeddings, initialCentroids);
+    return labels;
   });
 
   // Create result outside tidy
