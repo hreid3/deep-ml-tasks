@@ -1,17 +1,15 @@
-# Robons AI - Deep ML Tasks
+# Deep ML Tasks
 
 Part of the AI.biz Machine Learning Infrastructure
 
-![AI.biz](https://ai.biz/logo.png)
-
-A powerful Next.js microservice powering Robons AI's machine learning capabilities. This service provides enterprise-grade ML capabilities through RESTful APIs, enabling seamless integration of AI features into your applications.
+A powerful Next.js microservice powering AI's machine learning capabilities. This service provides enterprise-grade ML capabilities through RESTful APIs, enabling seamless integration of AI features into your applications.
 
 ## 🚀 Features
 
 - 🧠 NLP Tasks
   - Text Embeddings Generation - Transform text into high-dimensional vectors
-  - Semantic Search (Coming Soon)
-  - Text Classification (Coming Soon)
+  - Text Classification
+  - Summarization
   - Named Entity Recognition (Coming Soon)
 
 ## 📚 API Documentation
@@ -54,8 +52,6 @@ Visit `http://localhost:3000/api-doc` to explore the API documentation.
 
 ## 🤝 Contributing
 
-This repository is part of AI.biz's Robons AI product suite. For contribution guidelines, please contact the AI.biz development team.
+This repository is part of AI.biz's AI product suite. For contribution guidelines, please contact the AI.biz development team.
 
 ## 📝 License
-
-© 2024 AI.biz - All Rights Reserved
