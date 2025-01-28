@@ -8,7 +8,7 @@ A powerful Next.js microservice powering AI's machine learning capabilities. Thi
   - Text Embeddings Generation - Transform text into high-dimensional vectors
   - Text Classification
   - Summarization
-  - Semantic Searching (Coming Soon as needed for LegiScan)
+  - Semantic Searching (Coming Soon as needed for https://legiEquity.us)
 
 ## 📚 API Documentation
 
