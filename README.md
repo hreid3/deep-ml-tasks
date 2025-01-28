@@ -1,7 +1,5 @@
 # Deep ML Tasks
 
-Part of the AI.biz Machine Learning Infrastructure
-
 A powerful Next.js microservice powering AI's machine learning capabilities. This service provides enterprise-grade ML capabilities through RESTful APIs, enabling seamless integration of AI features into your applications.
 
 ## 🚀 Features
@@ -10,7 +8,7 @@ A powerful Next.js microservice powering AI's machine learning capabilities. Thi
   - Text Embeddings Generation - Transform text into high-dimensional vectors
   - Text Classification
   - Summarization
-  - Named Entity Recognition (Coming Soon)
+  - Semantic Searching (Coming Soon as needed for LegiScan)
 
 ## 📚 API Documentation
 
