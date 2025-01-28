@@ -27,7 +27,7 @@ Interactive API documentation is available at `/api-doc` when running the applic
 ### Setup
 1. Clone the repository:
 ```bash
-git clone https://github.com/ai-biz/deep-ml-tasks.git
+git clone git@github.com:hreid3/deep-ml-tasks.git
 cd deep-ml-tasks
 ```
 
@@ -50,6 +50,5 @@ Visit `http://localhost:3000/api-doc` to explore the API documentation.
 
 ## 🤝 Contributing
 
-This repository is part of AI.biz's AI product suite. For contribution guidelines, please contact the AI.biz development team.
 
 ## 📝 License
